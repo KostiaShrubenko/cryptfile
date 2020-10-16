@@ -5,14 +5,14 @@ First you install "libtommath":
 - You can find it here: https://github.com/libtom/libtommath/releases/tag/v1.2.0
 - Install "Source code"
 - Open "makefile.mingw" and assign to variable "PREFIX" your path to mingw environment.
-- Also, if needed change compiler to your in variable "CC"
+- Also, if needed change compiler to yours in variable "CC"
 - Now open terminal and type "gmake -f makefile.mingw install".
 
 Second you install "libtomcrypt":
 - You can find it here: https://github.com/libtom/libtomcrypt/releases/tag/v1.18.2
 - Install "Source code"
 - Open "makefile.mingw" and assign to variable "PREFIX" your path to mingw environment.
-- Also, if needed change compiler to your in variable "CC"
+- Also, if needed change compiler to yours in variable "CC"
 - Now open terminal and type "gmake -f makefile.mingw install".
 
 Third and last step, installation of program.
