@@ -16,7 +16,7 @@ static char acRelativePath[MAX_PATH_LENGTH];
 
 static Routine_t FindRoutine(unsigned char ucValidInputOptions);
 static ErrorType_t FindError(int argc, unsigned char ucValidInputOptions);
-static void ProcessInputArguments(unsigned char ucValidInputOptions, InputData_t const *ptInputArguments, char const *pcExePath);
+static void ProcessInputArguments(unsigned char ucValidInputOptions, InputData_t const *ptInputArguments);
 static void FindRelativePath(char const* cpExecutablePath, char *cpRelativePath);
 static void TakeInputFileName(char *pcSourceFile, char *pcFileName);
 
@@ -65,9 +65,10 @@ InputValidation_t Interface_ParceInput(int argc, char *argv[])
     if (tError == Error_Count)
     {
         tEvaluatedData.tRoutine = FindRoutine(ucAllOptionsRecieved);
+        FindRelativePath(argv[0], acRelativePath);
         if (tEvaluatedData.tRoutine != Routine_Help)
         {
-            ProcessInputArguments(ucAllOptionsRecieved, &InputValidArguments, argv[0]);
+            ProcessInputArguments(ucAllOptionsRecieved, &InputValidArguments);
         }
         tRetValue = Input_Valid;
     }
@@ -117,15 +118,22 @@ void Interface_PrintHelp(void)
     strcat(acPath2Help, HELP_FILE);
 
     ptHelpFile = fopen(acPath2Help, "r");
-    uiBufferSize = Interface_FileSize(ptHelpFile, 0);
+    if (ptHelpFile != NULL)
+    {
+        uiBufferSize = Interface_FileSize(ptHelpFile, 0);
 
-    pcBuffer = malloc(uiBufferSize);
+        pcBuffer = malloc(uiBufferSize);
 
-    fread(pcBuffer, 1, uiBufferSize, ptHelpFile);
-    fclose(ptHelpFile);
-    printf("\t\t -- Program Usage Description --\n");
-    fwrite(pcBuffer, 1, uiBufferSize - 1, stdout);
-    free(pcBuffer);
+        fread(pcBuffer, 1, uiBufferSize, ptHelpFile);
+        fclose(ptHelpFile);
+        printf("\t\t -- Program Usage Description --\n");
+        fwrite(pcBuffer, 1, uiBufferSize, stdout);
+        free(pcBuffer);
+    }
+    else
+    {
+        printf("Cant open Help file.\n");
+    }
 }
 
 unsigned int Interface_FileSize(FILE *ptFile, int iOffset)
@@ -213,17 +221,14 @@ ret:
     return tRetValue;
 }
 
-static void ProcessInputArguments(unsigned char ucValidInputOptions, InputData_t const *ptInputArguments, char const *pcExePath)
+static void ProcessInputArguments(unsigned char ucValidInputOptions, InputData_t const *ptInputArguments)
 {
     char acOutFileName[MAX_FILE_NAME_LENTGTH];
-    memset(acRelativePath, '\0', MAX_PATH_LENGTH);
     memset(acOutFileName, '\0', MAX_FILE_NAME_LENTGTH);
     
     if ((ucValidInputOptions & Mask_DestinationOption) == 0)
     {
-        FindRelativePath(pcExePath, acRelativePath);
         TakeInputFileName(ptInputArguments->pcSource, acOutFileName);
-
         strcpy(tEvaluatedData.acDestination, acRelativePath);
         strcat(tEvaluatedData.acDestination, DEFAULT_DESTINATION);
         if (tEvaluatedData.tRoutine == Routine_Encrypt)
@@ -236,6 +241,7 @@ static void ProcessInputArguments(unsigned char ucValidInputOptions, InputData_t
         }
         strcat(acOutFileName, FILE_EXTENSION);
         strcat(tEvaluatedData.acDestination, acOutFileName);
+        printf("dest: %s\n", tEvaluatedData.acDestination);
     }
     else
     {

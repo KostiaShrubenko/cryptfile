@@ -26,11 +26,9 @@ int main(int argc, char **argv)
                 break;
             case Routine_Encrypt:
                 Encryption();
-                printf("Data encrypted\n");
                 break;
             case Routine_Decrypt:
                 Decryption();
-                printf("Data decrypthed\n");
                 break;
             case Routine_Count:
             default:
@@ -93,6 +91,7 @@ void Encryption(void)
 
             /* Print header's content to stdout. */
             Header_Print(stdout);
+            printf("\nData encrypted\n\n");
         }
         free(pcBuffer);
     }
@@ -160,6 +159,7 @@ void Decryption(void)
         {        
             fwrite(pcBuffer, 1, uiBufferSize, ptFileOutput);
             fclose(ptFileOutput);
+            printf("\nData decrypted\n\n");
         }
         free(pcBuffer);
     }

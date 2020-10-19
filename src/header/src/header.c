@@ -45,7 +45,7 @@ void Header_Get(HeaderContent_t *ptDest)
 
 void Header_Print(FILE *ptOutStream)
 {
-    fprintf(ptOutStream, "Magic Number: 0x%X\n", tHeader.tHeaderSeparated.uiMagicNumber1);
+    fprintf(ptOutStream, "\nMagic Number: 0x%X\n", tHeader.tHeaderSeparated.uiMagicNumber1);
     fprintf(ptOutStream, "Size: %u (bytes)\n", tHeader.tHeaderSeparated.uiSize);
     fprintf(ptOutStream, "CheckSum: 0x%X\n", tHeader.tHeaderSeparated.uiCheckSum);
 }
