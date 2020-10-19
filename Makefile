@@ -1,5 +1,7 @@
 
 CC = gcc
+MAKE = gmake
+
 EXECUTABLE = cryptfile
 
 CFLAGS = -std=c99
@@ -20,8 +22,8 @@ $(OBJECTS): $(HEADERS)
 
 
 install: $(OBJECTS)
-	cd .\extramodules\libtommath\ && gmake -f $(EXTRAMAKE) libtommath.a CC=$(CC)
-	cd .\extramodules\libtomcrypt\ && gmake -f $(EXTRAMAKE) libtomcrypt.a CC=$(CC)
+	cd .\extramodules\libtommath\ && $(MAKE) -f $(EXTRAMAKE) libtommath.a CC=$(CC)
+	cd .\extramodules\libtomcrypt\ && $(MAKE) -f $(EXTRAMAKE) libtomcrypt.a CC=$(CC)
 	cmd /c if not exist ".\exe" mkdir ".\exe"
 	cmd /c if not exist ".\exe\outfiles" mkdir ".\exe\outfiles"
 	copy /Y ".\src\Help.txt" ".\exe" 
@@ -32,6 +34,6 @@ src/%.o: src/%.c
 
 .PHONY: clean
 clean:
-	cd .\extramodules\libtommath\ && gmake -f $(EXTRAMAKE) clean CC=$(CC)
-	cd .\extramodules\libtomcrypt\ && gmake -f $(EXTRAMAKE) clean CC=$(CC)
+	cd .\extramodules\libtommath\ && $(MAKE) -f $(EXTRAMAKE) clean CC=$(CC)
+	cd .\extramodules\libtomcrypt\ && $(MAKE) -f $(EXTRAMAKE) clean CC=$(CC)
 	cd .\src && cmd /c del /Q /S *.o
