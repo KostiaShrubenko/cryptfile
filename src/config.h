@@ -16,6 +16,7 @@
 /*      --- AES CYPHER PARAMETERS ---       */
 #define KEY_SIZE        32
 #define NUMBER_ROUNDS   0
+#define AES_BLOCK_SIZE      16
 /*      --- AES CYPHER PARAMETERS ---       */
 
 /*      --- Path and output files naming ---        */

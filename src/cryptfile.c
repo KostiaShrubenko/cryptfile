@@ -7,12 +7,12 @@
 /* acSource         -- path to input file.                                  */
 /* tRoutine         -- routine to be executed.                              */
 
-InputEvaluatedData_t tValidInput;
+static InputEvaluatedData_t tValidInput;
 
 /* Encryption routine. */
-void Encryption(void);
+static void Encryption(void);
 /* Decription routine. */
-void Decryption(void);
+static void Decryption(void);
 
 int main(int argc, char **argv)
 {   
@@ -43,14 +43,15 @@ int main(int argc, char **argv)
 }
 
 
-void Encryption(void)
+static void Encryption(void)
 {
     FILE* ptFileInput = NULL;
     FILE* ptFileOutput = NULL;
     /* Buffer to store temporary data from input file and output temporary data. */
     unsigned char *pcBuffer = NULL;
-    unsigned int uiBufferSize = 0;  /* Size of buffer, depends from input file size.    */ 
-    unsigned int uiChecksum = 0;    /* Check sum value evaluated with CRC32 algorithm.  */  
+    unsigned int uiTruncatedSize = 0;  /* Rounded data to be factor of <AES_BLOCK_SIZE>.    */ 
+    unsigned int uiFileSize = 0;       /* Size of buffer to contain file data.              */
+    unsigned int uiChecksum = 0;       /* Check sum value evaluated with CRC32 algorithm.   */  
 
     ptFileInput = fopen(tValidInput.acSource, "rb");
     /* Check whether file opend or created. */
@@ -62,16 +63,17 @@ void Encryption(void)
     else
     { /* File has been opend or created. */
         /* Calculate file size and set corresponding buffer size. */
-        uiBufferSize = Interface_FileSize(ptFileInput, 0);
-        
+        /* One must be added to buffersize for end of string.     */
+        uiFileSize = Interface_FileSize(ptFileInput, 0);
+        /* Round file size to factor of <AES_BLOCK_SIZE>. */
+        uiTruncatedSize = uiFileSize - (uiFileSize % AES_BLOCK_SIZE);
         /* Allocate memmory with "uiBufferSize". */
-        pcBuffer = malloc(uiBufferSize);
-        fread(pcBuffer, 1, uiBufferSize, ptFileInput);  /* Read full file to buffer. */
-        fclose(ptFileInput);                            /* Close file */
-
-
-        Cypher_Encrypt(pcBuffer, tValidInput.acKey);    /* Encrypt buffer's content with key.    */
-        uiChecksum = Checksum(pcBuffer, uiBufferSize);  /* Calculate checksum of encrypted data. */
+        pcBuffer = malloc(uiFileSize);
+        memset(pcBuffer, '\0', uiFileSize);           /* Initializate buffer to '\0'. */
+        fread(pcBuffer, 1, uiFileSize, ptFileInput);  /* Read full file to buffer.    */
+        fclose(ptFileInput);                          /* Close file                   */
+        Cypher_Encrypt(pcBuffer, uiTruncatedSize, tValidInput.acKey);    /* Encrypt buffer's content with key.    */
+        uiChecksum = Checksum(pcBuffer, uiFileSize);  /* Calculate checksum of encrypted data. */
 
         ptFileOutput = fopen(tValidInput.acDestination, "wb"); /* Open output file. */
         if (ptFileOutput == NULL)
@@ -81,12 +83,12 @@ void Encryption(void)
         }
         else
         {
-            Header_Update(HEADER_NUMBER, uiBufferSize, uiChecksum); /* Generate header.             */
-            Header_Append(ptFileOutput);                            /* Write header to output file. */
+            Header_Update(HEADER_NUMBER, uiFileSize, uiChecksum); /* Generate header.             */
+            Header_Append(ptFileOutput);                          /* Write header to output file. */
 
             /* Shift position in file after header. */
             fseek(ptFileOutput, HEADER_FULL_LENGTH, SEEK_SET);
-            fwrite(pcBuffer, 1, uiBufferSize, ptFileOutput);
+            fwrite(pcBuffer, 1, uiFileSize, ptFileOutput);
             fclose(ptFileOutput);
 
             /* Print header's content to stdout. */
@@ -97,14 +99,15 @@ void Encryption(void)
     }
 }
 
-void Decryption(void)
+static void Decryption(void)
 {
     FILE* ptFileInput = NULL;
     FILE* ptFileOutput = NULL;
     /* Buffer to store temporary data from input file and output temporary data. */
     unsigned char *pcBuffer = NULL;
-    unsigned int uiBufferSize = 0;  /* Size of buffer, depends from input file size.    */ 
-    unsigned int uiChecksum = 0;    /* Check sum value evaluated with CRC32 algorithm.  */  
+    unsigned int uiTruncatedSize = 0;  /* Rounded data to be factor of <AES_BLOCK_SIZE>.    */ 
+    unsigned int uiFileSize = 0;       /* Size of buffer to contain file data.              */
+    unsigned int uiChecksum = 0;       /* Check sum value evaluated with CRC32 algorithm.   */  
     HeaderContent_t tHeaderData;
 
     ptFileInput = fopen(tValidInput.acSource, "rb");
@@ -122,22 +125,25 @@ void Decryption(void)
             Header_Retrieve(ptFileInput);   /* Read header.                     */
             Header_Get(&tHeaderData);       /* Copy header to local variable.   */
             /* Evaluate file size without size of header. */
-            uiBufferSize = Interface_FileSize(ptFileInput, HEADER_FULL_LENGTH);
+            uiFileSize = Interface_FileSize(ptFileInput, HEADER_FULL_LENGTH);
+            uiTruncatedSize = uiFileSize - (uiFileSize % AES_BLOCK_SIZE);
             Header_Print(stdout); /* Print header's content to "stdout" */
             fseek(ptFileInput, HEADER_FULL_LENGTH, SEEK_SET); /* Move position in file after header. */
         }
         else
         { /* Header has not been found. */
-            uiBufferSize = Interface_FileSize(ptFileInput, 0);
+            uiFileSize = Interface_FileSize(ptFileInput, 0);
+            uiTruncatedSize = uiFileSize - (uiFileSize % AES_BLOCK_SIZE);
             printf("No header\n");
         }
         /* Allocate memmory with "uiBufferSize". */
-        pcBuffer = malloc(uiBufferSize);
-        fread(pcBuffer, 1, uiBufferSize, ptFileInput);
+        pcBuffer = malloc(uiFileSize);
+        memset(pcBuffer, '\0', uiFileSize);         /* Initializate buffer to '\0'. */
+        fread(pcBuffer, 1, uiFileSize, ptFileInput);
         fclose(ptFileInput);
-
         /* Calculate checsum of encrypted data in order to compare it for one in the header. */
-        uiChecksum = Checksum(pcBuffer, uiBufferSize); 
+        uiChecksum = Checksum(pcBuffer, uiFileSize);
+        printf("Newly calculated CheckSum: 0x%X\n", uiChecksum); 
         if (tHeaderData.uiCheckSum != uiChecksum)
         {
             printf("Calculated checksum does not match with one in the header.\nFile has been corupted\n");
@@ -147,7 +153,7 @@ void Decryption(void)
             printf("Calculated checksum matchs with one in the header.\nNo coruption.\n");
         }
         /* Decrypt buffer's content with given key */
-        Cypher_Decrypt(pcBuffer, tValidInput.acKey);
+        Cypher_Decrypt(pcBuffer, uiTruncatedSize, tValidInput.acKey);
 
         ptFileOutput = fopen(tValidInput.acDestination, "wb"); /* open output file. */
         if (ptFileOutput == NULL)
@@ -157,7 +163,7 @@ void Decryption(void)
         }
         else
         {        
-            fwrite(pcBuffer, 1, uiBufferSize, ptFileOutput);
+            fwrite(pcBuffer, 1, uiFileSize, ptFileOutput);
             fclose(ptFileOutput);
             printf("\nData decrypted\n\n");
         }

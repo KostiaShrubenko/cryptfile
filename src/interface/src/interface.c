@@ -1,7 +1,7 @@
 
 #include "interface.h"
 
-char *apcErrorMessage[Error_Count] =
+static char *apcErrorMessage[Error_Count] =
 {
     "Type \"-h\" to see instruction\n",
     "Option \"-h\" should be called wtihout any other options\n",
