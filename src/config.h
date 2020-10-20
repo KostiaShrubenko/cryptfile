@@ -22,12 +22,12 @@
 /*      --- Path and output files naming ---        */
 #define HELP_FILE               "Help.txt"      /* Path to file which contains help information.        */
 /* ## The following values are used when path to output file is not specifyed.                          */
-#define DEFAULT_DESTINATION     "outfiles\\"    /* Path to output files directory from relative path.   */
+#define DEFAULT_DESTINATION     "outfiles/"    /* Path to output files directory from relative path.   */
 #define FILE_PREFIX_DECRYPTED   "decrypted_"    /* Prefix for output files which was decrypted.         */
 #define FILE_PREFIX_ENCRYPTED   "encrypted_"    /* Prefix for output files which was encrypted.         */
 #define FILE_EXTENSION          ".bin"          /* Default extensions for output files.                 */
 /* Characters to form valid path */
-#define FOLDER_SEPARATOR    '\\'
+#define FOLDER_SEPARATOR    '/'
 #define EXTENSION_SEPARATOR '.'
 
 #define MAX_PATH_LENGTH         150 /* Max character length of path to file.     */

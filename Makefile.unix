@@ -8,7 +8,7 @@ CFLAGS = -std=c99
 
 EXTRAMAKE = makefile.unix
 
-EXTRALIBS = -Lextramodules/libtomcrypt -L/extramodules/libtommath -ltomcrypt -ltommath
+EXTRALIBS = -Lextramodules/libtomcrypt -Lextramodules/libtommath -ltomcrypt -ltommath
 EXTRAINCLUDES = -Iextramodules/libtomcrypt/src/headers
 LOCALINCLUDES = -Isrc/cypher/inc -Isrc/interface/inc -Isrc/header/inc -Isrc
 
@@ -36,4 +36,4 @@ src/%.o: src/%.c
 clean:
 	cd extramodules/libtommath/ && $(MAKE) -f $(EXTRAMAKE) clean CC=$(CC)
 	cd extramodules/libtomcrypt/ && $(MAKE) -f $(EXTRAMAKE) clean CC=$(CC)
-	cd src && rm -f *.o
+	rm -f $(OBJECTS)

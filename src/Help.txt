@@ -20,10 +20,10 @@ There are following options:
 				name which consist of [prefix_sourcefile] and 
 				extension [.bin].
 				NOTE: it is not path to folder. The following is
-				incorrect [\folder1\] it must be like [\folder1\file.bin]
+				incorrect [/folder1/] it must be like [/folder1/file.bin]
 
 NOTE: 	
-	As folder separator must be used character "\". The following is incorrect [fol/fl/im.bin]
+	As folder separator must be used character "/". The following is incorrect [fol\fl\im.bin]
 	Square brackets must be ommited.
 	If [key] not large enough, zeros are appended to the right of the [key].
 	If [key] larger then 32 bytes, it is truncated from the right.
@@ -33,6 +33,6 @@ NOTE:
 
 EXAMPLES:
 	-s image.jpg -e key
-	-f ..\folder\decrypted_image.jpg -d key -s encrypted_image.bin
+	-f ../folder/decrypted_image.jpg -d key -s encrypted_image.bin
 
 			

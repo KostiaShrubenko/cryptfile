@@ -2,9 +2,11 @@
 #define INTERFACE_H
 
 #include "config.h"
-#include <unistd.h>
+#include <getopt.h>
+//#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "interface_datatypes.h"
 
 /*  --- Color Codes For Setting Text's Color In Consol --- */
