@@ -1,0 +1,39 @@
+
+CC = gcc
+MAKE = make
+
+EXECUTABLE = cryptfile
+
+CFLAGS = -std=c99
+
+EXTRAMAKE = makefile.unix
+
+EXTRALIBS = -Lextramodules/libtomcrypt -L/extramodules/libtommath -ltomcrypt -ltommath
+EXTRAINCLUDES = -Iextramodules/libtomcrypt/src/headers
+LOCALINCLUDES = -Isrc/cypher/inc -Isrc/interface/inc -Isrc/header/inc -Isrc
+
+INC = $(EXTRAINCLUDES) $(LOCALINCLUDES)
+
+OBJECTS = src/cryptfile.o src/cypher/src/cypher.o src/interface/src/interface.o src/header/src/header.o
+
+HEADERS = src/cryptfile.h src/config.h src/cypher/inc/cypher.h src/interface/inc/interface.h src/interface/inc/interface_datatypes.h src/header/inc/header.h
+
+$(OBJECTS): $(HEADERS)
+
+
+install: $(OBJECTS)
+	cd extramodules/libtommath/ && $(MAKE) -f $(EXTRAMAKE) default CC=$(CC)
+	cd extramodules/libtomcrypt/ && $(MAKE) -f $(EXTRAMAKE) default CC=$(CC)
+	mkdir -p exe
+	mkdir -p exe/outfiles
+	cp src/Help.txt exe/Help.txt 
+	$(CC) $(CFLAGS) -o exe/$(EXECUTABLE) $(OBJECTS) $(EXTRALIBS)
+
+src/%.o: src/%.c
+	$(CC) $(CFLAGS) $(INC) -c $< -o $@
+
+.PHONY: clean
+clean:
+	cd extramodules/libtommath/ && $(MAKE) -f $(EXTRAMAKE) clean CC=$(CC)
+	cd extramodules/libtomcrypt/ && $(MAKE) -f $(EXTRAMAKE) clean CC=$(CC)
+	cd src && rm -f *.o
